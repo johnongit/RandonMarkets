@@ -1,0 +1,3114 @@
+[
+    {
+        "id": "f7df2808.c1be98",
+        "type": "tab",
+        "label": "LnMarkets",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "e0f44e85.bb942",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build check auth request",
+        "func": "const { createHmac } = crypto\nconst key = flow.get(\"key\")\n//const key = \"test\"\nconst secret = flow.get(\"secret\")\nconst passphrase = flow.get(\"passphrase\")\ntimestamp = Date.now()\nmethod = 'GET'\nhost = flow.get(\"url\")\npath = '/v1/user'\n\n//signature = createHmac('sha256', secret).update(\"test\").digest('base64')\nconst signature = createHmac('sha256', secret).update(`${timestamp}${method}${path}`).digest('base64')\n\nconst headers = {\n'Content-Type': 'application/json',\n'LNM-ACCESS-KEY': key,\n'LNM-ACCESS-PASSPHRASE': passphrase,\n'LNM-ACCESS-TIMESTAMP': timestamp,\n'LNM-ACCESS-SIGNATURE': signature\n}\nmsg.url = host + path\nmsg.headers = headers\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1590,
+        "y": 100,
+        "wires": [
+            [
+                "96d28ca7.ab768",
+                "fee8e56.40e6b18"
+            ]
+        ]
+    },
+    {
+        "id": "b5d25f5b.3d124",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1380,
+        "y": 160,
+        "wires": [
+            [
+                "e0f44e85.bb942"
+            ]
+        ]
+    },
+    {
+        "id": "96d28ca7.ab768",
+        "type": "http request",
+        "z": "f7df2808.c1be98",
+        "name": "Check user",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 1570,
+        "y": 160,
+        "wires": [
+            [
+                "cd82a8ee.eec588",
+                "fee8e56.40e6b18"
+            ]
+        ]
+    },
+    {
+        "id": "31bd5c2c.4a8e54",
+        "type": "ui_form",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "label": "",
+        "group": "1c99d14.da05d2f",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "key",
+                "value": "key",
+                "type": "text",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "secret",
+                "value": "secret",
+                "type": "text",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "passphrase",
+                "value": "passphrase",
+                "type": "text",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "url",
+                "value": "url",
+                "type": "text",
+                "required": true,
+                "rows": null
+            }
+        ],
+        "formValue": {
+            "key": "",
+            "secret": "",
+            "passphrase": "",
+            "url": ""
+        },
+        "payload": "",
+        "submit": "submit",
+        "cancel": "cancel",
+        "topic": "topic",
+        "topicType": "msg",
+        "splitLayout": "",
+        "className": "",
+        "x": 1010,
+        "y": 100,
+        "wires": [
+            [
+                "2b208224.bc154e"
+            ]
+        ]
+    },
+    {
+        "id": "2b208224.bc154e",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Set credentials",
+        "func": "\nflow.set(\"key\", msg.payload.key)\nflow.set(\"secret\", msg.payload.secret)\nflow.set(\"passphrase\", msg.payload.passphrase)\nflow.set(\"url\", msg.payload.url)\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1170,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a3cf6884.fa8d78",
+        "type": "ui_button",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "group": "4b8f477a.4abf98",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Check",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 1370,
+        "y": 100,
+        "wires": [
+            [
+                "e0f44e85.bb942"
+            ]
+        ]
+    },
+    {
+        "id": "cd82a8ee.eec588",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Parse connection",
+        "func": "if(msg.payload.hasOwnProperty(\"username\")) {\n    //username = msg.payload.username\n    //msg.payload = \"Hello \" + username\n    msg.payload.connect = true\n    flow.set(\"balance\", msg.payload.balance)\n    return [msg, null];\n    \n    \n}\nelse {\n    msg.payload.connect = false\n    return [null,msg]\n}\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1570,
+        "y": 220,
+        "wires": [
+            [
+                "fee8e56.40e6b18",
+                "f2380544.33bf28"
+            ],
+            [
+                "f2380544.33bf28"
+            ]
+        ]
+    },
+    {
+        "id": "fee8e56.40e6b18",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1880,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "56acf692.2c6a48",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Prepare order",
+        "func": "const { randomInt } = crypto\n\nlet side_random = randomInt(0,2)\nlet balance = flow.get(\"balance_usable\") || flow.get(\"balance\")\nlet margin = randomInt(Math.floor(balance*0.05),Math.floor(balance*0.1))\nleverage = randomInt(0,101)\nlet side = ''\nlet order = {}\n\nif(typeof flow.get(\"key\") == \"undefined\"){\n    return [null,msg];\n}\nelse {\n        \n    if(typeof flow.get(\"order_history\") == \"undefined\"){\n        flow.set(\"order_history\",[])\n    }\n    \n    \n    \n    \n    if (side_random == 1) {\n        side = 'b'\n    }\n    else {\n        side = 's'\n    }\n    order = {\n      \"type\": \"m\",\n      \"side\": side,\n      \"margin\": margin,\n      \"leverage\": leverage\n    }\n    flow.set(\"order\", order)\n    msg.payload = order\n    msg.margin = margin\n    \n    return [msg,null];\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1440,
+        "y": 480,
+        "wires": [
+            [
+                "98a8e2bb.aec4a",
+                "727d30c.c237ad"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "3aa0bf8b.c1dd9",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1220,
+        "y": 460,
+        "wires": [
+            [
+                "56acf692.2c6a48"
+            ]
+        ]
+    },
+    {
+        "id": "98a8e2bb.aec4a",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "Prepare order",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1680,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "17bb4dc1.becfb2",
+        "type": "ui_button",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "group": "290d618f.7e14be",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Create order",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "manual",
+        "topicType": "str",
+        "x": 1250,
+        "y": 560,
+        "wires": [
+            [
+                "56acf692.2c6a48"
+            ]
+        ]
+    },
+    {
+        "id": "f0ab971d.d92ff8",
+        "type": "http request",
+        "z": "f7df2808.c1be98",
+        "name": "Create Order Request",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 1520,
+        "y": 660,
+        "wires": [
+            [
+                "bc744c70.32c76",
+                "dd31386.118c3c8"
+            ]
+        ]
+    },
+    {
+        "id": "727d30c.c237ad",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build open request",
+        "func": "const { createHmac } = crypto\n\nconst key = flow.get(\"key\")\n//const key = \"test\"\nconst secret = flow.get(\"secret\")\nconst passphrase = flow.get(\"passphrase\")\n\ntimestamp = Date.now()\nmethod = 'POST'\npath = '/v1/futures'\nhost = flow.get(\"url\")\npayload = JSON.stringify(flow.get(\"order\"))\n\nconst signature = createHmac('sha256', secret).update(`${timestamp}${method}${path}${payload}`).digest('base64')\n\nconst headers = {\n'Content-Type': 'application/json',\n'LNM-ACCESS-KEY': key,\n'LNM-ACCESS-PASSPHRASE': passphrase,\n'LNM-ACCESS-TIMESTAMP': timestamp,\n'LNM-ACCESS-SIGNATURE': signature\n}\n\nmsg.headers = headers\nmsg.url = host + path\nmsg.payload = payload\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1470,
+        "y": 580,
+        "wires": [
+            [
+                "f0ab971d.d92ff8"
+            ]
+        ]
+    },
+    {
+        "id": "a4f5837b.665f4",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "Success",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1940,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "f2380544.33bf28",
+        "type": "ui_template",
+        "z": "f7df2808.c1be98",
+        "group": "4b8f477a.4abf98",
+        "name": "",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "format": "<div ng-if=\"msg.payload.connect\">\n<table>\n    <tr>\n        <td>Username:</td>\n        <td>{{msg.payload.username}}</td>\n    </tr>\n        <tr>\n        <td>Balance:</td>\n        <td>{{msg.payload.balance}}</td>\n    </tr>\n</table>\n<hr>\n</div>\n<div ng-if=\"!msg.payload.connect\">\n<p>Cannot connect to Lnmarket</p>\n\n\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1760,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3a1ab3c.5c8564c",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1260,
+        "y": 640,
+        "wires": [
+            [
+                "727d30c.c237ad"
+            ]
+        ]
+    },
+    {
+        "id": "bc744c70.32c76",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Parse order + define close_time + define TP",
+        "func": "const {randomInt}=crypto\nif(msg.payload.hasOwnProperty(\"position\")) {\n\n    msg.payload.order = true\n    order_history = flow.get(\"order_history\") || []\n    msg.payload.position.topic=msg.topic\n    let low_time = 0\n    let high_time = 0\n    if(msg.payload.position.leverage <20) {\n        low_time = 24 * 3600\n        high_time = 168 * 3600\n        msg.payload.position.tp_target=randomInt(5,15)\n    }\n    else if(msg.payload.position.leverage <40){\n        low_time = 24 * 3600\n        high_time = 168 * 3600\n        msg.payload.position.tp_target=randomInt(10,30)\n    }\n    else if(msg.payload.position.leverage <60){\n        low_time = 24 * 3600\n        high_time = 168 * 3600\n        msg.payload.position.tp_target=randomInt(15,45)\n    }\n    else if(msg.payload.position.leverage <80){\n        low_time = 1 * 3600\n        high_time = 48 * 3600\n        msg.payload.position.tp_target=randomInt(20,60)\n    }\n    else if(msg.payload.position.leverage <101){\n        low_time = 3 * 3600\n        high_time = 48 * 3600\n        msg.payload.position.tp_target=randomInt(30,100)\n    }\n    else {\n        let low_time = 0.5 * 3600\n        let high_time = 3 * 3600\n        msg.payload.position.tp_target=30\n    }\n    close_time = Date.now() + randomInt(low_time*1000,high_time*1000)\n    msg.payload.position.close_time = close_time\n    order_history.push(msg.payload.position)\n    flow.set(\"order_history\", order_history)\n    flow.set(\"balance_usable\", flow.get(\"balance_usable\")-msg.margin)\n    return [msg, null];\n    \n    \n}\nelse {\n    msg.payload.order = false\n    return [null,msg]\n}\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1590,
+        "y": 720,
+        "wires": [
+            [
+                "a4f5837b.665f4",
+                "f303571b.1e0dd8"
+            ],
+            [
+                "b9f0b245.047de"
+            ]
+        ]
+    },
+    {
+        "id": "b9f0b245.047de",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "fail to create",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1930,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "dd31386.118c3c8",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "Out create order",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1760,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "350e39a8.f35236",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "10",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payloadType": "date",
+        "x": 770,
+        "y": 880,
+        "wires": [
+            [
+                "b66bf4e4.171038"
+            ]
+        ]
+    },
+    {
+        "id": "5717482.d472bb8",
+        "type": "loop",
+        "z": "f7df2808.c1be98",
+        "name": "Iterate running order",
+        "kind": "enum",
+        "count": "",
+        "initial": "1",
+        "step": "1",
+        "condition": "",
+        "conditionType": "js",
+        "when": "before",
+        "enumeration": "order_history",
+        "enumerationType": "flow",
+        "limit": "",
+        "loopPayload": "loop-val",
+        "finalPayload": "final-count",
+        "x": 1120,
+        "y": 940,
+        "wires": [
+            [],
+            [
+                "b78831df.0fc28",
+                "6b99a86c.706f48"
+            ]
+        ]
+    },
+    {
+        "id": "b78831df.0fc28",
+        "type": "delay",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "1",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "outputs": 1,
+        "x": 1110,
+        "y": 1060,
+        "wires": [
+            [
+                "5717482.d472bb8"
+            ]
+        ]
+    },
+    {
+        "id": "7d9a1a82.e88234",
+        "type": "switch",
+        "z": "f7df2808.c1be98",
+        "name": "Check to close on close time",
+        "property": "date",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "payload.close_time",
+                "vt": "msg"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1360,
+        "y": 1020,
+        "wires": [
+            [
+                "4513dcc5.426bf4"
+            ],
+            [
+                "668e1085.6404c"
+            ]
+        ]
+    },
+    {
+        "id": "e7481559.3a98f8",
+        "type": "change",
+        "z": "f7df2808.c1be98",
+        "name": "Get current time",
+        "rules": [
+            {
+                "t": "set",
+                "p": "date",
+                "pt": "msg",
+                "to": "",
+                "tot": "date"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1380,
+        "y": 960,
+        "wires": [
+            [
+                "7d9a1a82.e88234"
+            ]
+        ]
+    },
+    {
+        "id": "4513dcc5.426bf4",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build close request",
+        "func": "const { createHmac } = crypto\nconst { URLSearchParams } = url\nmsg.data = \"\"\nconst key = flow.get(\"key\")\n//const key = \"test\"\nconst secret = flow.get(\"secret\")\nconst passphrase = flow.get(\"passphrase\")\ntimestamp = Date.now()\nmethod = 'DELETE'\nhost = flow.get(\"url\")\npath = '/v1/futures'\n//params = 'pid=' + msg.payload.pid\npid=msg.payload.pid\nmsg.payload = {}\nparams = 'pid=' + pid\n\ndata = `${params ? new URLSearchParams(params).toString() : ''}`\n\n\nconst signature = createHmac('sha256', secret).update(`${timestamp}${method}${path}${params}`).digest('base64')\n//const signature = createHmac('sha256', secret).update(`${timestamp}${method}${path}`).digest('base64')\n\n\nconst headers = {\n'Content-Type': 'application/json',\n'LNM-ACCESS-KEY': key,\n'LNM-ACCESS-PASSPHRASE': passphrase,\n'LNM-ACCESS-TIMESTAMP': timestamp,\n'LNM-ACCESS-SIGNATURE': signature\n}\n\nmsg.headers = headers\n\n//msg.url = host + path + `?${new URLSearchParams(params).toString()}`\nmsg.url = host + path + '?' + params\nmsg.pid = pid\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            },
+            {
+                "var": "url",
+                "module": "url"
+            }
+        ],
+        "x": 1630,
+        "y": 920,
+        "wires": [
+            [
+                "5b2c8f18.fb3b1",
+                "9a1a30cf0f310a5b"
+            ]
+        ]
+    },
+    {
+        "id": "5b2c8f18.fb3b1",
+        "type": "http request",
+        "z": "f7df2808.c1be98",
+        "name": "Delete order Request",
+        "method": "DELETE",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 1840,
+        "y": 920,
+        "wires": [
+            [
+                "3dd6629c.2a5c3e",
+                "9fb4a403.809e78"
+            ]
+        ]
+    },
+    {
+        "id": "9a5e94f8.1626a8",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "update closed",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2160,
+        "y": 1120,
+        "wires": []
+    },
+    {
+        "id": "3dd6629c.2a5c3e",
+        "type": "switch",
+        "z": "f7df2808.c1be98",
+        "name": "Check if OK",
+        "property": "statusCode",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "200",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1930,
+        "y": 980,
+        "wires": [
+            [
+                "6ed245cc.95695c"
+            ],
+            [
+                "45b6cabec12e5a8b"
+            ]
+        ]
+    },
+    {
+        "id": "6ed245cc.95695c",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Update order list",
+        "func": "let order_history = flow.get(\"order_history\")\nlet order_archive = flow.get(\"order_archive\") || []\nif(typeof flow.get(\"order_history\") == \"undefined\"){\n    flow.set(\"order_history\", [])\n}\n\norder_history.forEach(function(item, index, object) {\n  if (item.pid === msg.payload.pid || item.pid === msg.pid) {\n    order_archive.push(item)\n    object.splice(index, 1);\n\n  }\n});\n\nflow.set(\"order_history\",order_history)\nflow.set(\"order_archive\", order_archive)\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2220,
+        "y": 980,
+        "wires": [
+            [
+                "9a5e94f8.1626a8"
+            ]
+        ]
+    },
+    {
+        "id": "e2bb4e2f.1928c",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "10",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payloadType": "date",
+        "x": 950,
+        "y": 1300,
+        "wires": [
+            [
+                "f303571b.1e0dd8"
+            ]
+        ]
+    },
+    {
+        "id": "f303571b.1e0dd8",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build check auth request",
+        "func": "const { createHmac } = crypto\n\nif(typeof flow.get(\"key\") !=\"undefined\") {\n    const key = flow.get(\"key\")\n    //const key = \"test\"\n    const secret = flow.get(\"secret\")\n    const passphrase = flow.get(\"passphrase\")\n    timestamp = Date.now()\n    method = 'GET'\n    host = flow.get(\"url\")\n    path = '/v1/futures'\n    \n    //signature = createHmac('sha256', secret).update(\"test\").digest('base64')\n    const signature = createHmac('sha256', secret).update(`${timestamp}${method}${path}`).digest('base64')\n    \n    const headers = {\n    'Content-Type': 'application/json',\n    'LNM-ACCESS-KEY': key,\n    'LNM-ACCESS-PASSPHRASE': passphrase,\n    'LNM-ACCESS-TIMESTAMP': timestamp,\n    'LNM-ACCESS-SIGNATURE': signature\n    }\n    \n    msg.headers = headers\n    msg.url = host + path\n    return [msg,null];\n}\nelse\n{\n    return [null,msg]\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1190,
+        "y": 1300,
+        "wires": [
+            [
+                "88cd7fd0.7495f"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "88cd7fd0.7495f",
+        "type": "http request",
+        "z": "f7df2808.c1be98",
+        "name": "Get running order on LNM",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 1464.4444580078125,
+        "y": 1310,
+        "wires": [
+            [
+                "ad9da6e6.f0b218",
+                "707ee0a7.73b6"
+            ]
+        ]
+    },
+    {
+        "id": "ad9da6e6.f0b218",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build running order template",
+        "func": "let order_history_bot = flow.get(\"order_history\") || []\nlet order_archive_bot = flow.get(\"order_archive\") || []\nlet order_history_lnm = msg.payload\nlet order_history_todsp = []\nlet order_archive_todsp = []\nlet total_balance = flow.get(\"balance\") || 0\nsum = 0\ncount = 0\n\nif (msg.payload.length !== 0) {\n    msg.payload = {}\n    msg.payload.order_list = []\n\n    order_history_lnm.forEach(function(order_LNM) {\n\n        order_history_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n\n                order_LNM.pl_todsp = order_LNM.pl + ' (' + (100*(order_LNM.pl / order_LNM.margin)).toFixed(1) + '%)'\n                order_LNM.side=='b' ? order_LNM.side='Buy' : order_LNM.side='Sell'\n                order_LNM.creation_ts = new Date(order_LNM.creation_ts).toISOString()\n                order_LNM.close_todsp = new Date(order_bot.close_time).toISOString()\n                order_LNM.tp_target = order_bot.tp_target + \" %\"\n                order_bot.pl_percent = (100*(order_LNM.pl / order_LNM.margin))\n                order_bot.pl = order_LNM.pl\n                topic=order_bot.topic || \"\"\n                topic.includes('tweets/') ? order_LNM.topic=\"@\"+topic.replace('tweets/','') : order_LNM.topic=topic\n                \n                total_balance += order_bot.pl\n                sum +=  order_bot.pl\n                count +=1\n                order_history_todsp.push(order_LNM)\n            }\n        },order_LNM, order_history_todsp)\n\n\n    \n    },order_archive_bot, order_history_todsp,order_archive_todsp);\n    \n    \n\n    msg.payload.order_list = order_history_todsp\n    msg.payload.total_balance = total_balance\n    //msg.payload.order_history_bot = order_archive_todsp\n    //flow.set(\"order_history\", order_history_bot)\n    \n\n}\nelse {\n    msg.payload = {}\n}\nmsg.payload.sum = sum\nmsg.payload.count = count\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1520,
+        "y": 1360,
+        "wires": [
+            [
+                "372a4838.9a0c18",
+                "a5480a3c.f129e8",
+                "6ddd511501e82c9c",
+                "8037ed91abd823a0"
+            ]
+        ]
+    },
+    {
+        "id": "a5480a3c.f129e8",
+        "type": "ui_template",
+        "z": "f7df2808.c1be98",
+        "group": "b731d93a.1672d8",
+        "name": "running order template",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "format": "<h3>Total P/L ({{msg.payload.count}}): {{msg.payload.sum}}</h3>\n<table>\n    <thead>\n        <td><b>Side</b></td>\n        <td><b>Quantity</b></td>\n        <td><b>Margin</b></td>\n        <td><b>Leverage</b></td>\n        <td><b>P/L</b></td>\n        <td><b>Create at</b></td>\n        <td><b>Planned close Time</b></td>\n        <td><b>TP Target</b></td>\n        <td><b>Source</b></td>\n    </thead>\n    <tbody>\n    <tr ng-repeat=\"(key, value) in msg.payload.order_list\">\n        <td>{{value.side}}</td>\n        <td>{{value.quantity}}</td>\n        <td>{{value.margin}}</td>\n        <td>x{{value.leverage}}</td>\n        <td ng-style=\"{color : value.pl > 0 ? 'green' : 'red'}\">{{value.pl_todsp}}</td>\n        <td>{{value.creation_ts}}</td>\n        <td>{{value.close_todsp}}</td>\n        <td>{{value.tp_target}}</td>\n        <td>{{value.topic}}</td>\n    </tr>\n    </tbody>\n</table>\n",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1900,
+        "y": 1320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "707ee0a7.73b6",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "get test",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1820,
+        "y": 1240,
+        "wires": []
+    },
+    {
+        "id": "372a4838.9a0c18",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "build template",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2300,
+        "y": 1260,
+        "wires": []
+    },
+    {
+        "id": "77ee0fa4.c1ef3",
+        "type": "delay",
+        "z": "f7df2808.c1be98",
+        "name": "Retry if request failed",
+        "pauseType": "delay",
+        "timeout": "60",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 1900,
+        "y": 1100,
+        "wires": [
+            [
+                "4513dcc5.426bf4"
+            ]
+        ]
+    },
+    {
+        "id": "668e1085.6404c",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Check to close on TP",
+        "func": "let order = msg.payload\n\n\n\nif(order.pl_percent > 30 || order.pl_percent > order.tp_target) {\n    return [msg, null]\n}\n\n\n\n//return msg;",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            },
+            {
+                "var": "url",
+                "module": "url"
+            }
+        ],
+        "x": 1440,
+        "y": 1120,
+        "wires": [
+            [
+                "4513dcc5.426bf4",
+                "aa4b9491.ad43a8"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "aa4b9491.ad43a8",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1690,
+        "y": 1120,
+        "wires": []
+    },
+    {
+        "id": "6b99a86c.706f48",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Filter running order",
+        "func": "let order = msg.payload\n\nif(typeof order.pid == \"string\") {\n    return [msg, null]\n}\nelse {\n   return [null, msg] \n}\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            },
+            {
+                "var": "url",
+                "module": "url"
+            }
+        ],
+        "x": 1370,
+        "y": 900,
+        "wires": [
+            [
+                "e7481559.3a98f8"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "6621ea7e.92f874",
+        "type": "delay",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "pauseType": "random",
+        "timeout": "10",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "6",
+        "randomLast": "13",
+        "randomUnits": "hours",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 740,
+        "y": 400,
+        "wires": [
+            [
+                "ac585447.b3db58",
+                "56acf692.2c6a48"
+            ]
+        ]
+    },
+    {
+        "id": "ac585447.b3db58",
+        "type": "loop",
+        "z": "f7df2808.c1be98",
+        "name": "auto trade",
+        "kind": "cond",
+        "count": "",
+        "initial": "1",
+        "step": "1",
+        "condition": "true",
+        "conditionType": "js",
+        "when": "before",
+        "enumeration": "order_history",
+        "enumerationType": "flow",
+        "limit": "",
+        "loopPayload": "loop-val",
+        "finalPayload": "final-count",
+        "x": 680,
+        "y": 200,
+        "wires": [
+            [],
+            [
+                "6621ea7e.92f874"
+            ]
+        ]
+    },
+    {
+        "id": "2d79173d.7cfea8",
+        "type": "ui_button",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "group": "d437e8c8.334e98",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Start",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "start",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 270,
+        "y": 180,
+        "wires": [
+            [
+                "74d42ba749140260",
+                "a4c691ff5cf4ea50"
+            ]
+        ]
+    },
+    {
+        "id": "c2ca52c0.f8bb3",
+        "type": "ui_button",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "group": "d437e8c8.334e98",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Stop",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "break",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 290,
+        "y": 280,
+        "wires": [
+            [
+                "4ad7cc9c.32ab34"
+            ]
+        ]
+    },
+    {
+        "id": "4ad7cc9c.32ab34",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "cmd",
+        "func": "if(msg.payload == \"break\"){\n    msg.reset = true\n    flow.set(\"schedule_bot\", false)\n}\nelse if (msg.payload == \"start\") {\n    flow.set(\"schedule_bot\", true)\n}\n\nmsg.command = msg.payload\nmsg.topic = \"auto\"\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 260,
+        "wires": [
+            [
+                "ac585447.b3db58",
+                "6621ea7e.92f874"
+            ]
+        ]
+    },
+    {
+        "id": "9fb4a403.809e78",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "Delete order ",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2070,
+        "y": 900,
+        "wires": []
+    },
+    {
+        "id": "b66bf4e4.171038",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Check if order_history exist",
+        "func": "let order = flow.get(\"order_history\")\n\nif(typeof flow.get(\"order_history\") != \"undefined\") {\n    return [msg, null]\n}\nelse {\n   return [null, msg] \n}\n\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            },
+            {
+                "var": "url",
+                "module": "url"
+            }
+        ],
+        "x": 1000,
+        "y": 880,
+        "wires": [
+            [
+                "5717482.d472bb8"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "e5d62c9f.299d",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "300",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payloadType": "date",
+        "x": 930,
+        "y": 1520,
+        "wires": [
+            [
+                "6fdcf8c9.c53618"
+            ]
+        ]
+    },
+    {
+        "id": "6fdcf8c9.c53618",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build check auth request",
+        "func": "const { createHmac } = crypto\n\nif(typeof flow.get(\"key\") !=\"undefined\") {\n    const key = flow.get(\"key\")\n    //const key = \"test\"\n    const secret = flow.get(\"secret\")\n    const passphrase = flow.get(\"passphrase\")\n    timestamp = Date.now()\n    method = 'GET'\n    host = flow.get(\"url\")\n    path = '/v1/futures'\n\n\n    \n    const signature = createHmac('sha256', secret).update(`${timestamp}${method}${path}`).digest('base64')\n    \n    \n    const headers = {\n    'Content-Type': 'application/json',\n    'LNM-ACCESS-KEY': key,\n    'LNM-ACCESS-PASSPHRASE': passphrase,\n    'LNM-ACCESS-TIMESTAMP': timestamp,\n    'LNM-ACCESS-SIGNATURE': signature\n    }\n    \n    msg.headers = headers\n    msg.url = host + path\n    \n    return [msg,null];\n}\nelse\n{\n    return [null,msg]\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1170,
+        "y": 1520,
+        "wires": [
+            [
+                "bb962c63.7de42"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "bb962c63.7de42",
+        "type": "http request",
+        "z": "f7df2808.c1be98",
+        "name": "Get running order on LNM",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 1430,
+        "y": 1500,
+        "wires": [
+            [
+                "268be7e6.5c2698",
+                "2c29794e.e082d6"
+            ]
+        ]
+    },
+    {
+        "id": "268be7e6.5c2698",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Get total PL",
+        "func": "let order_history_bot = flow.get(\"order_history\") || []\nlet order_archive_bot = flow.get(\"order_archive\") || []\nlet order_history_lnm = msg.payload\nlet order_history_todsp = []\nlet order_archive_todsp = []\nlet total_balance = flow.get(\"balance\") || 0\nlet total_pl = 0\n\nif (msg.payload.length !== 0) {\n    msg.payload = {}\n    msg.payload.order_list = []\n\n    order_history_lnm.forEach(function(order_LNM) {\n\n        order_history_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n\n                order_LNM.pl_todsp = order_LNM.pl + ' (' + (100*(order_LNM.pl / order_LNM.margin)).toFixed(1) + '%)'\n                order_LNM.side=='b' ? order_LNM.side='Buy' : order_LNM.side='Sell'\n                order_LNM.creation_ts = new Date(order_LNM.creation_ts).toISOString()\n                order_LNM.close_todsp = new Date(order_bot.close_time).toISOString()\n                order_LNM.tp_target = order_bot.tp_target + \" %\"\n                order_bot.pl_percent = (100*(order_LNM.pl / order_LNM.margin))\n                order_bot.pl = order_LNM.pl\n                total_balance += order_bot.pl\n                \n                order_history_todsp.push(order_LNM)\n            }\n        },order_LNM, order_history_todsp)\n\n    \n    },order_history_bot,order_archive_bot, order_history_todsp,order_archive_todsp);\n    \n    \n\n    msg.payload.order_list = order_history_todsp\n    \n    //msg.payload.order_history_bot = order_archive_todsp\n\n}\nelse {\n    msg.payload = {}\n}\nmsg.payload.total_balance = total_balance\nmsg.payload.total_pl = total_pl\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1610,
+        "y": 1540,
+        "wires": [
+            [
+                "2c29794e.e082d6",
+                "1790db78.ae63f5"
+            ]
+        ]
+    },
+    {
+        "id": "16aa5120.02b7ff",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payloadType": "date",
+        "x": 910,
+        "y": 1760,
+        "wires": [
+            [
+                "9aae5791.506b78"
+            ]
+        ]
+    },
+    {
+        "id": "9aae5791.506b78",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build check auth request",
+        "func": "const { createHmac } = crypto\n\nif(typeof flow.get(\"key\") !=\"undefined\") {\n    const key = flow.get(\"key\")\n    //const key = \"test\"\n    const secret = flow.get(\"secret\")\n    const passphrase = flow.get(\"passphrase\")\n    timestamp = Date.now()\n    method = 'GET'\n    host = flow.get(\"url\")\n    path = '/v1/futures'\n    params = 'type=closed'\n    \n    //signature = createHmac('sha256', secret).update(\"test\").digest('base64')\n    const signature = createHmac('sha256', secret).update(`${timestamp}${method}${path}${params}`).digest('base64')\n    \n    const headers = {\n    'Content-Type': 'application/json',\n    'LNM-ACCESS-KEY': key,\n    'LNM-ACCESS-PASSPHRASE': passphrase,\n    'LNM-ACCESS-TIMESTAMP': timestamp,\n    'LNM-ACCESS-SIGNATURE': signature\n    }\n    msg.payload = {}\n    msg.headers = headers\n    msg.url = host + path + '?' + params\n    return [msg,null];\n}\nelse\n{\n    return [null,msg]\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1150,
+        "y": 1760,
+        "wires": [
+            [
+                "2c429d41.617932"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "2c429d41.617932",
+        "type": "http request",
+        "z": "f7df2808.c1be98",
+        "name": "Get closed order on LNM",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 1410,
+        "y": 1760,
+        "wires": [
+            [
+                "96849f43.b5106",
+                "9061b84d.89f208"
+            ]
+        ]
+    },
+    {
+        "id": "9061b84d.89f208",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build closed order template",
+        "func": "let order_archive_bot = flow.get(\"order_archive\") || []\nlet order_history_bot = flow.get(\"order_history\") || []\nlet order_history_lnm = msg.payload\nlet order_archive_todsp = []\nlet sum = 0\nlet total_balance = flow.get(\"balance\") || 0\n\n\nif (msg.payload.length !== 0) {\n    msg.payload = {}\n    msg.payload.order_list = []\n\n    order_history_lnm.forEach(function(order_LNM) {\n        order_archive_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n                order_LNM.pl_todsp = order_LNM.pl + ' (' + (100*(order_LNM.pl / order_LNM.margin)).toFixed(1) + '%)'\n                order_LNM.side=='b' ? order_LNM.side='Buy' : order_LNM.side='Sell'\n                order_LNM.creation_ts = new Date(order_LNM.creation_ts).toISOString()\n                order_LNM.closed_ts = new Date(order_LNM.closed_ts).toISOString()\n                order_LNM.tp_target = order_bot.tp_target + \" %\"\n                order_bot.pl_percent = (100*(order_LNM.pl / order_LNM.margin))\n                order_bot.pl = order_LNM.pl\n                sum += order_LNM.pl\n\n                topic=order_bot.topic || \"\"\n                topic.includes('tweets/') ? order_LNM.topic=\"@\"+topic.replace('tweets/','') : order_LNM.topic=topic\n                order_archive_todsp.push(order_LNM)\n            }\n        },order_LNM, order_archive_todsp)\n        order_history_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n                order_archive_bot.push(order_bot)\n                order_history_bot.splice(index, 1);\n                flow.set(\"balance_usable\", flow.get(\"balance_usable\")+order_LNM.margin+order_LNM.pl)\n                , \" \", order_LNM.margin, \" \", order_LNM.pl)\n            }\n        }, order_history_bot, order_archive_bot)\n        \n\n    },order_archive_bot, order_history_bot, order_archive_todsp);\n    \n    flow.set(\"order_archive\", order_archive_bot)\n    flow.set(\"order_history\", order_history_bot)\n    order_archive_todsp = order_archive_todsp.sort((a, b) => (a.closed_ts < b.closed_ts) ? 1 : -1)\n    msg.payload.order_archive_list = order_archive_todsp\n\n\n\n\n}\nelse {\n    msg.payload = {}\n}\nmsg.payload.sum = sum\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1660,
+        "y": 1780,
+        "wires": [
+            [
+                "99d8c950.9f98f8",
+                "89f827df.493818",
+                "46a1ede839fbaebd"
+            ]
+        ]
+    },
+    {
+        "id": "96849f43.b5106",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1730,
+        "y": 1720,
+        "wires": []
+    },
+    {
+        "id": "99d8c950.9f98f8",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1930,
+        "y": 1740,
+        "wires": []
+    },
+    {
+        "id": "2c29794e.e082d6",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1790,
+        "y": 1520,
+        "wires": []
+    },
+    {
+        "id": "2acbd46b.1f6cdc",
+        "type": "ui_chart",
+        "z": "f7df2808.c1be98",
+        "name": "Chart balance",
+        "group": "9f69077460d57cd8",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "3",
+        "removeOlderPoints": "100000",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1880,
+        "y": 1580,
+        "wires": [
+            [
+                "49bae82bbd11ab09",
+                "20835e59564229f6"
+            ]
+        ]
+    },
+    {
+        "id": "1790db78.ae63f5",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build chart",
+        "func": "msg.payload = msg.payload.total_balance\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1610,
+        "y": 1580,
+        "wires": [
+            [
+                "2acbd46b.1f6cdc"
+            ]
+        ]
+    },
+    {
+        "id": "89f827df.493818",
+        "type": "ui_template",
+        "z": "f7df2808.c1be98",
+        "group": "84820c36765e477a",
+        "name": "Closed order template",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "format": "<h3>Total P/L: {{msg.payload.sum}}</h3>\n<table>\n    <thead>\n        <td><b>Side</b></td>\n        <td><b>Quantity</b></td>\n        <td><b>Margin</b></td>\n        <td><b>Leverage</b></td>\n        <td><b>P/L</b></td>\n        <td><b>Created at</b></td>\n        <td><b>Closed at</b></td>\n        <td><b>TP Target</b></td>\n        <td><b>Source</b></td>\n    </thead>\n    <tbody>\n    <tr ng-repeat=\"(key, value) in msg.payload.order_archive_list\">\n        <td>{{value.side}}</td>\n        <td>{{value.quantity}}</td>\n        <td>{{value.margin}}</td>\n        <td>x{{value.leverage}}</td>\n        <td ng-style=\"{color : value.pl > 0 ? 'green' : 'red'}\">{{value.pl_todsp}}</td>\n        <td>{{value.creation_ts}}</td>\n        <td>{{value.closed_ts}}</td>\n        <td>{{value.tp_target}}</td>\n        <td>{{value.topic}}</td>\n    </tr>\n    </tbody>\n</table>\n",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1960,
+        "y": 1800,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3972d1cf.09fa3e",
+        "type": "twitter in",
+        "z": "f7df2808.c1be98",
+        "twitter": "",
+        "tags": "bitcoin",
+        "user": "false",
+        "name": "tweet listenner",
+        "inputs": 0,
+        "x": 310,
+        "y": 520,
+        "wires": [
+            [
+                "29956c8e.55a964"
+            ]
+        ]
+    },
+    {
+        "id": "29956c8e.55a964",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "find fud tweet",
+        "func": "/*\nconst ngmi_users = [\n    \"johnmirror12\",\n    \"nico_dufrene\",\n    \"gchampeau\",\n    \"GaelGiraud_CNRS\",\n    \"AuroreLalucq\",\n    \"ecb\",\n    \"PabloGallegos1\",\n    \"PeterSchiff\",\n    \"Lagarde\",\n    \"elonmusk\",\n    \"paulkrugman\",\n    \"nntaleb\",\n    \"Frances_Coppola\",\n    \"GeoffreyDorne\"\n]\n*/\nlet ngmi_users = flow.get(\"ngmi_users\") || []\nlet enable_twitter_bot = flow.get(\"enable_twitter_bot\") || false\n\nlet tweet = {}\nngmi_users.forEach((user) => {\n    topic = 'tweets/'+ user\n    if(msg.topic == topic && msg.tweet.in_reply_to_status_id == null) {\n\n        tweet = msg\n    }\n})\n\nif(typeof tweet.topic == \"undefined\" || !enable_twitter_bot){\n\n    return [null,msg]\n}\nelse {\n    msg.payload = tweet\n    return [msg,null]\n}\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 520,
+        "wires": [
+            [
+                "2107b405.f9664c",
+                "56acf692.2c6a48"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "2107b405.f9664c",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "tweet",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 670,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "9a1a30cf0f310a5b",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "Debug request",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1840,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "45b6cabec12e5a8b",
+        "type": "switch",
+        "z": "f7df2808.c1be98",
+        "name": "Check if alread closed",
+        "property": "payload.code",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "positionClosed",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1960,
+        "y": 1020,
+        "wires": [
+            [
+                "6ed245cc.95695c",
+                "0f467672f25e3db5"
+            ],
+            [
+                "77ee0fa4.c1ef3"
+            ]
+        ]
+    },
+    {
+        "id": "0f467672f25e3db5",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "already closed",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2200,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "6ddd511501e82c9c",
+        "type": "change",
+        "z": "f7df2808.c1be98",
+        "name": "get PL",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.sum",
+                "tot": "msg",
+                "dc": true
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1830,
+        "y": 1360,
+        "wires": [
+            [
+                "a559591401d09e2b"
+            ]
+        ]
+    },
+    {
+        "id": "a559591401d09e2b",
+        "type": "ui_gauge",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "group": "3fa7b6b3e6979a24",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "",
+        "label": "Satoshis",
+        "format": "{{value}}",
+        "min": "-10000",
+        "max": "10000",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3acb4a"
+        ],
+        "seg1": "-1",
+        "seg2": "1",
+        "className": "",
+        "x": 2010,
+        "y": 1360,
+        "wires": []
+    },
+    {
+        "id": "49bae82bbd11ab09",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2070,
+        "y": 1520,
+        "wires": []
+    },
+    {
+        "id": "20835e59564229f6",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Backup chart",
+        "func": "flow.set(\"chart\", msg.payload)\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2070,
+        "y": 1600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9ff5b84690e61b05",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Reload Chart",
+        "func": "msg.payload = flow.get(\"chart\") || []\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1590,
+        "y": 1660,
+        "wires": [
+            [
+                "2acbd46b.1f6cdc"
+            ]
+        ]
+    },
+    {
+        "id": "f210ee237d10223c",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payloadType": "date",
+        "x": 1390,
+        "y": 1660,
+        "wires": [
+            [
+                "9ff5b84690e61b05"
+            ]
+        ]
+    },
+    {
+        "id": "5929379aea237436",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build check auth request",
+        "func": "const { createHmac } = crypto\n\nif(typeof flow.get(\"key\") !=\"undefined\") {\n    const key = flow.get(\"key\")\n    //const key = \"test\"\n    const secret = flow.get(\"secret\")\n    const passphrase = flow.get(\"passphrase\")\n    timestamp = Date.now()\n    method = 'GET'\n    host = flow.get(\"url\")\n    path = '/v1/futures/history/index'\n    //date=Date.now()-300000\n    date=Date.now()-60000\n    params = 'from=' + date\n    \n    //signature = createHmac('sha256', secret).update(\"test\").digest('base64')\n    const signature = createHmac('sha256', secret).update(`${timestamp}${method}${path}${params}`).digest('base64')\n    //const signature = createHmac('sha256', secret).update(`${timestamp}${method}${path}`).digest('base64')\n    const headers = {\n    'Content-Type': 'application/json',\n    'LNM-ACCESS-KEY': key,\n    'LNM-ACCESS-PASSPHRASE': passphrase,\n    'LNM-ACCESS-TIMESTAMP': timestamp,\n    'LNM-ACCESS-SIGNATURE': signature\n    }\n    msg.payload = {}\n    msg.headers = headers\n    msg.url = host + path + '?' + params\n    return [msg,null];\n}\nelse\n{\n    return [null,msg]\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1210,
+        "y": 2040,
+        "wires": [
+            [
+                "6e66e729ccaabb50"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "0b697645548776e3",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "date",
+        "x": 990,
+        "y": 2060,
+        "wires": [
+            [
+                "5929379aea237436"
+            ]
+        ]
+    },
+    {
+        "id": "0c0cc7e25b44d53c",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "price up",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1920,
+        "y": 2100,
+        "wires": []
+    },
+    {
+        "id": "6e66e729ccaabb50",
+        "type": "http request",
+        "z": "f7df2808.c1be98",
+        "name": "Get closed order on LNM",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "x": 1470,
+        "y": 1960,
+        "wires": [
+            [
+                "551fd137fd17ae7e"
+            ]
+        ]
+    },
+    {
+        "id": "551fd137fd17ae7e",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build check auth request",
+        "func": "price_list = msg.payload || []\n\nprice_n = price_list[0].index\nprice_n_1 = price_list[price_list.length-1].index\nresult = (price_n/price_n_1)-1\n\nmsg = {}\nmsg.price_n = price_n\nmsg.price_n_1 = price_n_1\nmsg.result = result*100\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "crypto",
+                "module": "crypto"
+            }
+        ],
+        "x": 1530,
+        "y": 2140,
+        "wires": [
+            [
+                "551a941c5ff13cd7"
+            ]
+        ]
+    },
+    {
+        "id": "551a941c5ff13cd7",
+        "type": "switch",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "property": "result",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "0.1",
+                "vt": "num"
+            },
+            {
+                "t": "lt",
+                "v": "-0.1",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 1750,
+        "y": 2140,
+        "wires": [
+            [
+                "0c0cc7e25b44d53c"
+            ],
+            [
+                "17c47ed8757b2f8c"
+            ],
+            [
+                "817b795795a11f1b"
+            ]
+        ]
+    },
+    {
+        "id": "17c47ed8757b2f8c",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "price down",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1930,
+        "y": 2140,
+        "wires": []
+    },
+    {
+        "id": "817b795795a11f1b",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "price",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1910,
+        "y": 2200,
+        "wires": []
+    },
+    {
+        "id": "c5a205569ef0f3c3",
+        "type": "ui_button",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "group": "979a72d2e1e9ce87",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Start bot",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 350,
+        "y": 580,
+        "wires": [
+            [
+                "d2159ae8376d13e6"
+            ]
+        ]
+    },
+    {
+        "id": "d2159ae8376d13e6",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Set twitter bot state",
+        "func": "let status = {}\nflow.set(\"enable_twitter_bot\", msg.payload)\n\nif(msg.payload) {\n    status.fill=\"green\"\n    status.text=true\n    \n}\nelse {\n    status.fill=\"\"\n    status.text=false \n}\nnode.status(status);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "756cde216e6e8eac",
+        "type": "ui_button",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "group": "979a72d2e1e9ce87",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Stop bot",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "false",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 340,
+        "y": 640,
+        "wires": [
+            [
+                "d2159ae8376d13e6"
+            ]
+        ]
+    },
+    {
+        "id": "038325e9c00e2f69",
+        "type": "ui_form",
+        "z": "f7df2808.c1be98",
+        "name": "Form add NGMI Users",
+        "label": "NGMI Users",
+        "group": "979a72d2e1e9ce87",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "NGMI Users",
+                "value": "user",
+                "type": "multiline",
+                "required": true,
+                "rows": 3
+            }
+        ],
+        "formValue": {
+            "user": ""
+        },
+        "payload": "",
+        "submit": "update",
+        "cancel": "cancel",
+        "topic": "topic",
+        "topicType": "msg",
+        "splitLayout": "",
+        "className": "",
+        "x": 240,
+        "y": 760,
+        "wires": [
+            [
+                "7c24993c85988c50",
+                "9c9c90ddb91e9c3d"
+            ]
+        ]
+    },
+    {
+        "id": "b425af80117bc4f1",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "form",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 590,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "7c24993c85988c50",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Parse list",
+        "func": "//ngmi_users=(msg.payload.user).split(\",\")\nngmi_users=(msg.payload.user).split('\\n')\nflow.set(\"ngmi_users\",ngmi_users)\nmsg.payload=ngmi_users\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 760,
+        "wires": [
+            [
+                "b425af80117bc4f1"
+            ]
+        ]
+    },
+    {
+        "id": "a4c691ff5cf4ea50",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Reset before retart",
+        "func": "msg.reset = true\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 180,
+        "wires": [
+            [
+                "6621ea7e.92f874"
+            ]
+        ]
+    },
+    {
+        "id": "74d42ba749140260",
+        "type": "delay",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "100",
+        "timeoutUnits": "milliseconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 310,
+        "y": 220,
+        "wires": [
+            [
+                "4ad7cc9c.32ab34"
+            ]
+        ]
+    },
+    {
+        "id": "bdd583ffdef47166",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payloadType": "date",
+        "x": 250,
+        "y": 40,
+        "wires": [
+            [
+                "4cda5c67c9a29b9f"
+            ]
+        ]
+    },
+    {
+        "id": "4cda5c67c9a29b9f",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Reset before retart",
+        "func": "schedule_bot = flow.get(\"schedule_bot\") || false\n\nif(schedule_bot) {\n    return [msg,null]\n}\nelse {\n    return [null,msg]    \n}\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 190,
+        "y": 120,
+        "wires": [
+            [
+                "2d79173d.7cfea8"
+            ],
+            [
+                "c2ca52c0.f8bb3"
+            ]
+        ]
+    },
+    {
+        "id": "ce97805efa7699a9",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Order creation",
+        "info": "",
+        "x": 1400,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "14e7d89664101f71",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Twitter bot",
+        "info": "",
+        "x": 520,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "7c9257fbc095e173",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Auto bot",
+        "info": "",
+        "x": 440,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "bf425b8b03f6b39f",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Credentials",
+        "info": "",
+        "x": 910,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "41a9860a3f8c3348",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Check auth and balance",
+        "info": "",
+        "x": 1370,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "fe44fc34fdb04211",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Order Auto delete",
+        "info": "",
+        "x": 1100,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "e786c04fe807df64",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Delete on time expiration",
+        "info": "",
+        "x": 1330,
+        "y": 1040,
+        "wires": []
+    },
+    {
+        "id": "4829aa1ec41eeff2",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Delete on TP",
+        "info": "",
+        "x": 1310,
+        "y": 1140,
+        "wires": []
+    },
+    {
+        "id": "afc504e92bd17921",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Build running order template ",
+        "info": "",
+        "x": 920,
+        "y": 1260,
+        "wires": []
+    },
+    {
+        "id": "e6661bbf1526c2d9",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Build chart",
+        "info": "",
+        "x": 820,
+        "y": 1480,
+        "wires": []
+    },
+    {
+        "id": "31a106580551d871",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Build closed order template",
+        "info": "",
+        "x": 910,
+        "y": 1720,
+        "wires": []
+    },
+    {
+        "id": "c81f047c0af2fe0d",
+        "type": "ui_form",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "label": "",
+        "group": "7113ac1107b6ef4f",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "balance",
+                "value": "balance",
+                "type": "number",
+                "required": false,
+                "rows": null
+            }
+        ],
+        "formValue": {
+            "balance": ""
+        },
+        "payload": "",
+        "submit": "Set limit",
+        "cancel": "cancel",
+        "topic": "topic",
+        "topicType": "msg",
+        "splitLayout": "",
+        "className": "",
+        "x": 1070,
+        "y": 260,
+        "wires": [
+            [
+                "3d3a1eef19744c45",
+                "29e9552023da7243"
+            ]
+        ]
+    },
+    {
+        "id": "3d3a1eef19744c45",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Set balance",
+        "func": "\nflow.set(\"balance_configured\", msg.payload.balance)\nflow.set(\"balance_usable\", msg.payload.balance || flow.get(\"balance\"))\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1230,
+        "y": 260,
+        "wires": [
+            [
+                "9a6d787c52cc2abe",
+                "75938b45ba24852d"
+            ]
+        ]
+    },
+    {
+        "id": "ba430b9788f0f553",
+        "type": "ui_text",
+        "z": "f7df2808.c1be98",
+        "group": "7113ac1107b6ef4f",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Balance configured",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1550,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "ea41a3c1e64e1bd2",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "date",
+        "x": 1130,
+        "y": 320,
+        "wires": [
+            [
+                "9a6d787c52cc2abe",
+                "75938b45ba24852d"
+            ]
+        ]
+    },
+    {
+        "id": "9a6d787c52cc2abe",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Set balance",
+        "func": "\nmsg.payload = flow.get(\"balance_configured\") || \"Not configured\"\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1310,
+        "y": 320,
+        "wires": [
+            [
+                "ba430b9788f0f553"
+            ]
+        ]
+    },
+    {
+        "id": "29e9552023da7243",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "Set balance",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1250,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "b2c882f305f148bc",
+        "type": "ui_text",
+        "z": "f7df2808.c1be98",
+        "group": "7113ac1107b6ef4f",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Balance usable",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1560,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "75938b45ba24852d",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Set balance",
+        "func": "if(flow.get(\"balance_configured\") == null ) {\n    balance_usable = flow.get(\"balance\")\n}\nelse {\n    balance_usable = flow.get(\"balance_usable\")\n}\n\nmsg.payload = balance_usable\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1310,
+        "y": 360,
+        "wires": [
+            [
+                "b2c882f305f148bc"
+            ]
+        ]
+    },
+    {
+        "id": "5730a259aaef902c",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 580,
+        "wires": [
+            [
+                "9c9c90ddb91e9c3d"
+            ]
+        ]
+    },
+    {
+        "id": "9c9c90ddb91e9c3d",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Autfill form",
+        "func": "users = flow.get(\"ngmi_users\") || []\nmsg.payload = {}\nmsg.payload.user = users.join('\\n')\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 170,
+        "y": 660,
+        "wires": [
+            [
+                "b425af80117bc4f1",
+                "038325e9c00e2f69"
+            ]
+        ]
+    },
+    {
+        "id": "23b2a1d7b7379f33",
+        "type": "status",
+        "z": "f7df2808.c1be98",
+        "name": "Status auto trade",
+        "scope": [
+            "ac585447.b3db58"
+        ],
+        "x": 160,
+        "y": 320,
+        "wires": [
+            [
+                "3c013360f494c7d6",
+                "3ebc3d939bb272fb"
+            ]
+        ]
+    },
+    {
+        "id": "4a80d985299c5291",
+        "type": "ui_text",
+        "z": "f7df2808.c1be98",
+        "group": "d437e8c8.334e98",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Status",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 330,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "3c013360f494c7d6",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Status auto trade",
+        "func": "let status = msg.status\n\nif(status.fill==\"blue\") {\n    msg.payload = \"Running\"\n}\nelse {\n    msg.payload = \"Stopped\"\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 170,
+        "y": 360,
+        "wires": [
+            [
+                "4a80d985299c5291"
+            ]
+        ]
+    },
+    {
+        "id": "c09fb478c3fc1c0b",
+        "type": "status",
+        "z": "f7df2808.c1be98",
+        "name": "Status auto trade",
+        "scope": [
+            "3972d1cf.09fa3e",
+            "d2159ae8376d13e6"
+        ],
+        "x": 300,
+        "y": 820,
+        "wires": [
+            [
+                "02164f88da7e1a21",
+                "6b8e8be3b0be6467"
+            ]
+        ]
+    },
+    {
+        "id": "02164f88da7e1a21",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "tweet status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 490,
+        "y": 920,
+        "wires": []
+    },
+    {
+        "id": "cfa1c98482bd3ac6",
+        "type": "ui_text",
+        "z": "f7df2808.c1be98",
+        "group": "979a72d2e1e9ce87",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Tweet bot status",
+        "label": "Status",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 540,
+        "y": 860,
+        "wires": []
+    },
+    {
+        "id": "3ebc3d939bb272fb",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 390,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "6b8e8be3b0be6467",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Status tweet",
+        "func": "let status = msg.status\nif (status.fill == \"red\"){\n    msg.payload = \"Twitter bot disconnected\"\n}\nelse if (status.text == \"true\" && status.fill == \"green\"){\n    msg.payload = \"Twitter bot is running\"\n}\nelse {\n    msg.payload = \"Twitter bot is stopped\"\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 820,
+        "wires": [
+            [
+                "cfa1c98482bd3ac6"
+            ]
+        ]
+    },
+    {
+        "id": "8037ed91abd823a0",
+        "type": "change",
+        "z": "f7df2808.c1be98",
+        "name": "get PL",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.order_list",
+                "tot": "msg",
+                "dc": true
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2050,
+        "y": 1420,
+        "wires": [
+            [
+                "372a4838.9a0c18"
+            ]
+        ]
+    },
+    {
+        "id": "4cecff9dc1f175de",
+        "type": "csv",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "sep": ":",
+        "hdrin": true,
+        "hdrout": "all",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": true,
+        "include_null_values": true,
+        "x": 2270,
+        "y": 340,
+        "wires": [
+            [
+                "77ad1ebde46778f9"
+            ]
+        ]
+    },
+    {
+        "id": "e27a144e27e65924",
+        "type": "ui_form",
+        "z": "f7df2808.c1be98",
+        "name": "Export archive to csv",
+        "label": "",
+        "group": "d709e89dce562a75",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "",
+                "value": "csv",
+                "type": "multiline",
+                "required": false,
+                "rows": 3
+            }
+        ],
+        "formValue": {
+            "csv": ""
+        },
+        "payload": "",
+        "submit": "Get order history",
+        "cancel": "cancel",
+        "topic": "topic",
+        "topicType": "msg",
+        "splitLayout": "",
+        "className": "",
+        "x": 1900,
+        "y": 320,
+        "wires": [
+            [
+                "8e9ae5dc21d72c0b"
+            ]
+        ]
+    },
+    {
+        "id": "77ad1ebde46778f9",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Push order list to dashboard",
+        "func": "let csv = msg.payload\nmsg.payload = {}\nmsg.payload.csv = csv\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2220,
+        "y": 420,
+        "wires": [
+            [
+                "e27a144e27e65924"
+            ]
+        ]
+    },
+    {
+        "id": "8e9ae5dc21d72c0b",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Get Order List",
+        "func": "order_archive = flow.get(\"order_archive\") || []\norder_archive_toexp = []\n\norder_archive.forEach(function(order) {\n    tmp = {}\n    tmp.side = order.side\n    tmp.price = order.price.toString().replace('.',',')\n    tmp.margin = order.margin\n    tmp.quantity = order.quantity\n    tmp.leverage = order.leverage\n    tmp.creation_ts = order.creation_ts\n    tmp.close_time = new Date(order.close_time).toISOString()\n    tmp.pl = order.pl.toString().replace('.',',')\n    tmp.pl_percent = order.pl_percent.toString().replace('.',',')\n    tmp.source = order.topic\n    \n    order_archive_toexp.push(tmp)\n}, order_archive_toexp)\nmsg.payload = order_archive_toexp\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2120,
+        "y": 340,
+        "wires": [
+            [
+                "4cecff9dc1f175de"
+            ]
+        ]
+    },
+    {
+        "id": "8c71a736fa587e52",
+        "type": "comment",
+        "z": "f7df2808.c1be98",
+        "name": "Check auth and balance",
+        "info": "",
+        "x": 2130,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "54ffc403cbd2d1c7",
+        "type": "ui_chart",
+        "z": "f7df2808.c1be98",
+        "name": "Chart PL",
+        "group": "c7294d447fe286dc",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "3",
+        "removeOlderPoints": "100000",
+        "removeOlderUnit": "604800",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1940,
+        "y": 1880,
+        "wires": [
+            [
+                "c05b2d0af9837e8e"
+            ]
+        ]
+    },
+    {
+        "id": "c05b2d0af9837e8e",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Backup chart",
+        "func": "flow.set(\"chart_pl\", msg.payload)\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2130,
+        "y": 1880,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3b7b0668b479f369",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Reload Chart",
+        "func": "msg.payload = flow.get(\"chart_pl\") || []\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1530,
+        "y": 1860,
+        "wires": [
+            [
+                "46a1ede839fbaebd"
+            ]
+        ]
+    },
+    {
+        "id": "46a1ede839fbaebd",
+        "type": "function",
+        "z": "f7df2808.c1be98",
+        "name": "Build chart",
+        "func": "msg.payload = msg.payload.sum\n\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1730,
+        "y": 1860,
+        "wires": [
+            [
+                "54ffc403cbd2d1c7"
+            ]
+        ]
+    },
+    {
+        "id": "4143bc616a247ea1",
+        "type": "inject",
+        "z": "f7df2808.c1be98",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payloadType": "date",
+        "x": 1510,
+        "y": 1820,
+        "wires": [
+            [
+                "3b7b0668b479f369"
+            ]
+        ]
+    },
+    {
+        "id": "167286ed708ed083",
+        "type": "ui_spacer",
+        "z": "f7df2808.c1be98",
+        "name": "spacer",
+        "group": "4b8f477a.4abf98",
+        "order": 2,
+        "width": 6,
+        "height": 1
+    },
+    {
+        "id": "1c99d14.da05d2f",
+        "type": "ui_group",
+        "name": "Credentials",
+        "tab": "deb49792.c272d8",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "4b8f477a.4abf98",
+        "type": "ui_group",
+        "name": "Check connection",
+        "tab": "deb49792.c272d8",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "290d618f.7e14be",
+        "type": "ui_group",
+        "name": "Create Order",
+        "tab": "deb49792.c272d8",
+        "order": 7,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "b731d93a.1672d8",
+        "type": "ui_group",
+        "name": "Running order",
+        "tab": "99723573b24f87ca",
+        "order": 1,
+        "disp": true,
+        "width": "14",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "d437e8c8.334e98",
+        "type": "ui_group",
+        "name": "Auto Start",
+        "tab": "deb49792.c272d8",
+        "order": 5,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "9f69077460d57cd8",
+        "type": "ui_group",
+        "name": "Balance History",
+        "tab": "deb49792.c272d8",
+        "order": 9,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "84820c36765e477a",
+        "type": "ui_group",
+        "name": "Closed position",
+        "tab": "99723573b24f87ca",
+        "order": 2,
+        "disp": true,
+        "width": "14",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "3fa7b6b3e6979a24",
+        "type": "ui_group",
+        "name": "PL",
+        "tab": "deb49792.c272d8",
+        "order": 8,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "979a72d2e1e9ce87",
+        "type": "ui_group",
+        "name": "Tweeter bot",
+        "tab": "deb49792.c272d8",
+        "order": 6,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "7113ac1107b6ef4f",
+        "type": "ui_group",
+        "name": "Limit",
+        "tab": "deb49792.c272d8",
+        "order": 4,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "d709e89dce562a75",
+        "type": "ui_group",
+        "name": "Export History",
+        "tab": "deb49792.c272d8",
+        "order": 11,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "c7294d447fe286dc",
+        "type": "ui_group",
+        "name": "PL History",
+        "tab": "deb49792.c272d8",
+        "order": 10,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "deb49792.c272d8",
+        "type": "ui_tab",
+        "name": "LNMarket",
+        "icon": "dashboard",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "99723573b24f87ca",
+        "type": "ui_tab",
+        "name": "LNMarket orders",
+        "icon": "dashboard",
+        "order": 3,
+        "disabled": false,
+        "hidden": false
+    }
+]
