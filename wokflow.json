@@ -27,7 +27,7 @@
         "wires": [
             [
                 "96d28ca7.ab768",
-                "fee8e56.40e6b18"
+                "f0a3ba25e75d3d91"
             ]
         ]
     },
@@ -220,12 +220,13 @@
         "id": "fee8e56.40e6b18",
         "type": "debug",
         "z": "f7df2808.c1be98",
-        "name": "",
-        "active": false,
+        "name": "debug auth",
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "false",
+        "complete": "payload",
+        "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
         "x": 1880,
@@ -237,7 +238,7 @@
         "type": "function",
         "z": "f7df2808.c1be98",
         "name": "Prepare order",
-        "func": "const { randomInt } = crypto\n\nlet side_random = randomInt(0,2)\nlet balance = flow.get(\"balance_usable\") || flow.get(\"balance\")\nlet margin = randomInt(Math.floor(balance*0.05),Math.floor(balance*0.1))\nleverage = randomInt(0,101)\nlet side = ''\nlet order = {}\n\nif(typeof flow.get(\"key\") == \"undefined\"){\n    return [null,msg];\n}\nelse {\n        \n    if(typeof flow.get(\"order_history\") == \"undefined\"){\n        flow.set(\"order_history\",[])\n    }\n    \n    \n    \n    \n    if (side_random == 1) {\n        side = 'b'\n    }\n    else {\n        side = 's'\n    }\n    order = {\n      \"type\": \"m\",\n      \"side\": side,\n      \"margin\": margin,\n      \"leverage\": leverage\n    }\n    flow.set(\"order\", order)\n    msg.payload = order\n    msg.margin = margin\n    \n    return [msg,null];\n}",
+        "func": "const { randomInt } = crypto\n\nlet side_random = randomInt(0,2)\nlet balance = flow.get(\"balance_usable\") || flow.get(\"balance\")\nlet margin = randomInt(Math.floor(balance*0.05),Math.floor(balance*0.1))\nleverage = randomInt(0,50)\nlet side = ''\nlet order = {}\n\nif(typeof flow.get(\"key\") == \"undefined\"){\n    return [null,msg];\n}\nelse {\n        \n    if(typeof flow.get(\"order_history\") == \"undefined\"){\n        flow.set(\"order_history\",[])\n    }\n    \n    \n    \n    \n    if (side_random == 1) {\n        side = 'b'\n    }\n    else {\n        side = 's'\n    }\n    order = {\n      \"type\": \"m\",\n      \"side\": side,\n      \"margin\": margin,\n      \"leverage\": leverage\n    }\n    flow.set(\"order\", order)\n    msg.payload = order\n    msg.margin = margin\n    \n    return [msg,null];\n}",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -451,7 +452,7 @@
         "type": "function",
         "z": "f7df2808.c1be98",
         "name": "Parse order + define close_time + define TP",
-        "func": "const {randomInt}=crypto\nif(msg.payload.hasOwnProperty(\"position\")) {\n\n    msg.payload.order = true\n    order_history = flow.get(\"order_history\") || []\n    msg.payload.position.topic=msg.topic\n    let low_time = 0\n    let high_time = 0\n    if(msg.payload.position.leverage <20) {\n        low_time = 24 * 3600\n        high_time = 168 * 3600\n        msg.payload.position.tp_target=randomInt(5,15)\n    }\n    else if(msg.payload.position.leverage <40){\n        low_time = 24 * 3600\n        high_time = 168 * 3600\n        msg.payload.position.tp_target=randomInt(10,30)\n    }\n    else if(msg.payload.position.leverage <60){\n        low_time = 24 * 3600\n        high_time = 168 * 3600\n        msg.payload.position.tp_target=randomInt(15,45)\n    }\n    else if(msg.payload.position.leverage <80){\n        low_time = 1 * 3600\n        high_time = 48 * 3600\n        msg.payload.position.tp_target=randomInt(20,60)\n    }\n    else if(msg.payload.position.leverage <101){\n        low_time = 3 * 3600\n        high_time = 48 * 3600\n        msg.payload.position.tp_target=randomInt(30,100)\n    }\n    else {\n        let low_time = 0.5 * 3600\n        let high_time = 3 * 3600\n        msg.payload.position.tp_target=30\n    }\n    close_time = Date.now() + randomInt(low_time*1000,high_time*1000)\n    msg.payload.position.close_time = close_time\n    order_history.push(msg.payload.position)\n    flow.set(\"order_history\", order_history)\n    flow.set(\"balance_usable\", flow.get(\"balance_usable\")-msg.margin)\n    return [msg, null];\n    \n    \n}\nelse {\n    msg.payload.order = false\n    return [null,msg]\n}\n",
+        "func": "const {randomInt}=crypto\nif(msg.payload.hasOwnProperty(\"position\")) {\n\n    msg.payload.order = true\n    order_history = flow.get(\"order_history\") || []\n    msg.payload.position.topic=msg.topic\n    let low_time = 0\n    let high_time = 0\n    if(msg.payload.position.leverage <20) {\n        low_time = 24 * 3600\n        high_time = 168 * 3600\n        msg.payload.position.tp_target=randomInt(5,15)\n    }\n    else if(msg.payload.position.leverage <40){\n        low_time = 24 * 3600\n        high_time = 168 * 3600\n        msg.payload.position.tp_target=randomInt(10,30)\n    }\n    else if(msg.payload.position.leverage <60){\n        low_time = 24 * 3600\n        high_time = 168 * 3600\n        msg.payload.position.tp_target=randomInt(30,60)\n    }\n    else if(msg.payload.position.leverage <80){\n        low_time = 1 * 3600\n        high_time = 48 * 3600\n        msg.payload.position.tp_target=randomInt(50,100)\n    }\n    else if(msg.payload.position.leverage <101){\n        low_time = 3 * 3600\n        high_time = 48 * 3600\n        msg.payload.position.tp_target=randomInt(30,100)\n    }\n    else {\n        let low_time = 0.5 * 3600\n        let high_time = 3 * 3600\n        msg.payload.position.tp_target=30\n    }\n    close_time = Date.now() + randomInt(low_time*1000,high_time*1000)\n    msg.payload.position.close_time = close_time\n    order_history.push(msg.payload.position)\n    flow.set(\"order_history\", order_history)\n    flow.set(\"balance_usable\", flow.get(\"balance_usable\")-msg.margin)\n    return [msg, null];\n    \n    \n}\nelse {\n    msg.payload.order = false\n    return [null,msg]\n}\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -845,7 +846,7 @@
         "type": "function",
         "z": "f7df2808.c1be98",
         "name": "Build running order template",
-        "func": "let order_history_bot = flow.get(\"order_history\") || []\nlet order_archive_bot = flow.get(\"order_archive\") || []\nlet order_history_lnm = msg.payload\nlet order_history_todsp = []\nlet order_archive_todsp = []\nlet total_balance = flow.get(\"balance\") || 0\nsum = 0\ncount = 0\n\nif (msg.payload.length !== 0) {\n    msg.payload = {}\n    msg.payload.order_list = []\n\n    order_history_lnm.forEach(function(order_LNM) {\n\n        order_history_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n\n                order_LNM.pl_todsp = order_LNM.pl + ' (' + (100*(order_LNM.pl / order_LNM.margin)).toFixed(1) + '%)'\n                order_LNM.side=='b' ? order_LNM.side='Buy' : order_LNM.side='Sell'\n                order_LNM.creation_ts = new Date(order_LNM.creation_ts).toISOString()\n                order_LNM.close_todsp = new Date(order_bot.close_time).toISOString()\n                order_LNM.tp_target = order_bot.tp_target + \" %\"\n                order_bot.pl_percent = (100*(order_LNM.pl / order_LNM.margin))\n                order_bot.pl = order_LNM.pl\n                topic=order_bot.topic || \"\"\n                topic.includes('tweets/') ? order_LNM.topic=\"@\"+topic.replace('tweets/','') : order_LNM.topic=topic\n                \n                total_balance += order_bot.pl\n                sum +=  order_bot.pl\n                count +=1\n                order_history_todsp.push(order_LNM)\n            }\n        },order_LNM, order_history_todsp)\n\n\n    \n    },order_archive_bot, order_history_todsp,order_archive_todsp);\n    \n    \n\n    msg.payload.order_list = order_history_todsp\n    msg.payload.total_balance = total_balance\n    //msg.payload.order_history_bot = order_archive_todsp\n    //flow.set(\"order_history\", order_history_bot)\n    \n\n}\nelse {\n    msg.payload = {}\n}\nmsg.payload.sum = sum\nmsg.payload.count = count\n\nreturn msg;",
+        "func": "let order_history_bot = flow.get(\"order_history\") || []\nlet order_archive_bot = flow.get(\"order_archive\") || []\nlet order_history_lnm = msg.payload\nlet order_history_todsp = []\nlet order_archive_todsp = []\nlet total_balance = flow.get(\"balance\") || 0\nsum = 0\ncount = 0\n\nif (msg.payload.length !== 0) {\n    msg.payload = {}\n    msg.payload.order_list = []\n\n    order_history_lnm.forEach(function(order_LNM) {\n\n        order_history_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n\n                order_LNM.pl_todsp = order_LNM.pl + ' (' + (100*(order_LNM.pl / order_LNM.margin)).toFixed(1) + '%)'\n                order_LNM.side=='b' ? order_LNM.side='Buy' : order_LNM.side='Sell'\n                order_LNM.creation_ts = new Date(order_LNM.creation_ts).toISOString()\n                order_LNM.close_todsp = new Date(order_bot.close_time).toISOString()\n                order_LNM.tp_target = order_bot.tp_target + \" %\"\n                order_bot.pl_percent = (100*(order_LNM.pl / order_LNM.margin))\n                order_bot.pl = order_LNM.pl\n                topic=order_bot.topic || \"\"\n                topic.includes('tweets/') ? order_LNM.topic=\"@\"+topic.replace('tweets/','') : order_LNM.topic=topic\n                \n                total_balance += order_bot.pl\n                sum +=  order_bot.pl\n                count +=1\n                order_history_todsp.push(order_LNM)\n            }\n        },order_LNM, order_history_todsp)\n\n\n    \n    },order_archive_bot, order_history_todsp,order_archive_todsp);\n    \n    //console.log(\"test 2 \", order_history_todsp)\n\n    msg.payload.order_list = order_history_todsp\n    msg.payload.total_balance = total_balance\n    //msg.payload.order_history_bot = order_archive_todsp\n    //flow.set(\"order_history\", order_history_bot)\n    \n\n}\nelse {\n    msg.payload = {}\n}\nmsg.payload.sum = sum\nmsg.payload.count = count\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -947,7 +948,7 @@
         "type": "function",
         "z": "f7df2808.c1be98",
         "name": "Check to close on TP",
-        "func": "let order = msg.payload\n\n\n\nif(order.pl_percent > 30 || order.pl_percent > order.tp_target) {\n    return [msg, null]\n}\n\n\n\n//return msg;",
+        "func": "let order = msg.payload\n\n\n\nif(order.pl_percent > order.tp_target) {\n    return [msg, null]\n}\n\n\n\n//return msg;",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -1274,7 +1275,7 @@
         "type": "function",
         "z": "f7df2808.c1be98",
         "name": "Get total PL",
-        "func": "let order_history_bot = flow.get(\"order_history\") || []\nlet order_archive_bot = flow.get(\"order_archive\") || []\nlet order_history_lnm = msg.payload\nlet order_history_todsp = []\nlet order_archive_todsp = []\nlet total_balance = flow.get(\"balance\") || 0\nlet total_pl = 0\n\nif (msg.payload.length !== 0) {\n    msg.payload = {}\n    msg.payload.order_list = []\n\n    order_history_lnm.forEach(function(order_LNM) {\n\n        order_history_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n\n                order_LNM.pl_todsp = order_LNM.pl + ' (' + (100*(order_LNM.pl / order_LNM.margin)).toFixed(1) + '%)'\n                order_LNM.side=='b' ? order_LNM.side='Buy' : order_LNM.side='Sell'\n                order_LNM.creation_ts = new Date(order_LNM.creation_ts).toISOString()\n                order_LNM.close_todsp = new Date(order_bot.close_time).toISOString()\n                order_LNM.tp_target = order_bot.tp_target + \" %\"\n                order_bot.pl_percent = (100*(order_LNM.pl / order_LNM.margin))\n                order_bot.pl = order_LNM.pl\n                total_balance += order_bot.pl\n                \n                order_history_todsp.push(order_LNM)\n            }\n        },order_LNM, order_history_todsp)\n\n    \n    },order_history_bot,order_archive_bot, order_history_todsp,order_archive_todsp);\n    \n    \n\n    msg.payload.order_list = order_history_todsp\n    \n    //msg.payload.order_history_bot = order_archive_todsp\n\n}\nelse {\n    msg.payload = {}\n}\nmsg.payload.total_balance = total_balance\nmsg.payload.total_pl = total_pl\n\nreturn msg;",
+        "func": "let order_history_bot = flow.get(\"order_history\") || []\nlet order_archive_bot = flow.get(\"order_archive\") || []\nlet order_history_lnm = msg.payload\nlet order_history_todsp = []\nlet order_archive_todsp = []\nlet total_balance = flow.get(\"balance\") || 0\nlet total_pl = 0\n\nif (msg.payload.length !== 0) {\n    msg.payload = {}\n    msg.payload.order_list = []\n\n    order_history_lnm.forEach(function(order_LNM) {\n\n        order_history_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n\n                order_LNM.pl_todsp = order_LNM.pl + ' (' + (100*(order_LNM.pl / order_LNM.margin)).toFixed(1) + '%)'\n                order_LNM.side=='b' ? order_LNM.side='Buy' : order_LNM.side='Sell'\n                order_LNM.creation_ts = new Date(order_LNM.creation_ts).toISOString()\n                order_LNM.close_todsp = new Date(order_bot.close_time).toISOString()\n                order_LNM.tp_target = order_bot.tp_target + \" %\"\n                order_bot.pl_percent = (100*(order_LNM.pl / order_LNM.margin))\n                order_bot.pl = order_LNM.pl\n                total_balance += order_bot.pl\n                total_pl += order_bot.pl\n                order_history_todsp.push(order_LNM)\n            }\n        },order_LNM, order_history_todsp)\n\n    \n    },order_history_bot,order_archive_bot, order_history_todsp,order_archive_todsp);\n    \n    //console.log(\"test 2 \", order_history_todsp)\n\n    msg.payload.order_list = order_history_todsp\n    \n    //msg.payload.order_history_bot = order_archive_todsp\n\n}\nelse {\n    msg.payload = {}\n}\nmsg.payload.total_balance = total_balance\nmsg.payload.total_pl = total_pl\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1370,7 +1371,7 @@
         "type": "function",
         "z": "f7df2808.c1be98",
         "name": "Build closed order template",
-        "func": "let order_archive_bot = flow.get(\"order_archive\") || []\nlet order_history_bot = flow.get(\"order_history\") || []\nlet order_history_lnm = msg.payload\nlet order_archive_todsp = []\nlet sum = 0\nlet total_balance = flow.get(\"balance\") || 0\n\n\nif (msg.payload.length !== 0) {\n    msg.payload = {}\n    msg.payload.order_list = []\n\n    order_history_lnm.forEach(function(order_LNM) {\n        order_archive_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n                order_LNM.pl_todsp = order_LNM.pl + ' (' + (100*(order_LNM.pl / order_LNM.margin)).toFixed(1) + '%)'\n                order_LNM.side=='b' ? order_LNM.side='Buy' : order_LNM.side='Sell'\n                order_LNM.creation_ts = new Date(order_LNM.creation_ts).toISOString()\n                order_LNM.closed_ts = new Date(order_LNM.closed_ts).toISOString()\n                order_LNM.tp_target = order_bot.tp_target + \" %\"\n                order_bot.pl_percent = (100*(order_LNM.pl / order_LNM.margin))\n                order_bot.pl = order_LNM.pl\n                sum += order_LNM.pl\n\n                topic=order_bot.topic || \"\"\n                topic.includes('tweets/') ? order_LNM.topic=\"@\"+topic.replace('tweets/','') : order_LNM.topic=topic\n                order_archive_todsp.push(order_LNM)\n            }\n        },order_LNM, order_archive_todsp)\n        order_history_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n                order_archive_bot.push(order_bot)\n                order_history_bot.splice(index, 1);\n                flow.set(\"balance_usable\", flow.get(\"balance_usable\")+order_LNM.margin+order_LNM.pl)\n                , \" \", order_LNM.margin, \" \", order_LNM.pl)\n            }\n        }, order_history_bot, order_archive_bot)\n        \n\n    },order_archive_bot, order_history_bot, order_archive_todsp);\n    \n    flow.set(\"order_archive\", order_archive_bot)\n    flow.set(\"order_history\", order_history_bot)\n    order_archive_todsp = order_archive_todsp.sort((a, b) => (a.closed_ts < b.closed_ts) ? 1 : -1)\n    msg.payload.order_archive_list = order_archive_todsp\n\n\n\n\n}\nelse {\n    msg.payload = {}\n}\nmsg.payload.sum = sum\n\nreturn msg;",
+        "func": "let order_archive_bot = flow.get(\"order_archive\") || []\nlet order_history_bot = flow.get(\"order_history\") || []\nlet order_history_lnm = msg.payload\nlet order_archive_todsp = []\nlet sum = 0\nlet total_balance = flow.get(\"balance\") || 0\n\nif (msg.payload.length !== 0) {\n    msg.payload = {}\n    msg.payload.order_list = []\n\n    order_history_lnm.forEach(function(order_LNM) {\n        order_archive_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n                order_LNM.pl_todsp = order_LNM.pl + ' (' + (100*(order_LNM.pl / order_LNM.margin)).toFixed(1) + '%)'\n                order_LNM.side=='b' ? order_LNM.side='Buy' : order_LNM.side='Sell'\n                order_LNM.creation_ts = new Date(order_LNM.creation_ts).toISOString()\n                order_LNM.closed_ts = new Date(order_LNM.closed_ts).toISOString()\n                order_LNM.tp_target = order_bot.tp_target + \" %\"\n                order_bot.pl_percent = (100*(order_LNM.pl / order_LNM.margin))\n                order_bot.pl = order_LNM.pl\n                sum += order_LNM.pl\n                topic=order_bot.topic || \"\"\n                topic.includes('tweets/') ? order_LNM.topic=\"@\"+topic.replace('tweets/','') : order_LNM.topic=topic\n                order_archive_todsp.push(order_LNM)\n            }\n        },order_LNM, order_archive_todsp)\n        order_history_bot.forEach(function(order_bot, index, object) {\n            if(order_bot.pid == order_LNM.pid) {\n                order_archive_bot.push(order_bot)\n                order_history_bot.splice(index, 1);\n                flow.set(\"balance_usable\", flow.get(\"balance_usable\")+order_LNM.margin+order_LNM.pl)\n                console.log(\"test \", flow.get(\"balance_usable\"), \" \", order_LNM.margin, \" \", order_LNM.pl)\n            }\n        }, order_history_bot, order_archive_bot)\n        \n\n    },order_archive_bot, order_history_bot, order_archive_todsp);\n    \n    flow.set(\"order_archive\", order_archive_bot)\n    flow.set(\"order_history\", order_history_bot)\n    order_archive_todsp = order_archive_todsp.sort((a, b) => (a.closed_ts < b.closed_ts) ? 1 : -1)\n    msg.payload.order_archive_list = order_archive_todsp\n\n\n\n\n}\nelse {\n    msg.payload = {}\n}\nmsg.payload.sum = sum\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -1382,7 +1383,7 @@
             [
                 "99d8c950.9f98f8",
                 "89f827df.493818",
-                "46a1ede839fbaebd"
+                "a985b93940b33052"
             ]
         ]
     },
@@ -1390,8 +1391,8 @@
         "id": "96849f43.b5106",
         "type": "debug",
         "z": "f7df2808.c1be98",
-        "name": "",
-        "active": false,
+        "name": "get closed order",
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -1399,7 +1400,7 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1730,
+        "x": 1760,
         "y": 1720,
         "wires": []
     },
@@ -1546,7 +1547,7 @@
         "type": "function",
         "z": "f7df2808.c1be98",
         "name": "find fud tweet",
-        "func": "/*\nconst ngmi_users = [\n    \"johnmirror12\",\n    \"nico_dufrene\",\n    \"gchampeau\",\n    \"GaelGiraud_CNRS\",\n    \"AuroreLalucq\",\n    \"ecb\",\n    \"PabloGallegos1\",\n    \"PeterSchiff\",\n    \"Lagarde\",\n    \"elonmusk\",\n    \"paulkrugman\",\n    \"nntaleb\",\n    \"Frances_Coppola\",\n    \"GeoffreyDorne\"\n]\n*/\nlet ngmi_users = flow.get(\"ngmi_users\") || []\nlet enable_twitter_bot = flow.get(\"enable_twitter_bot\") || false\n\nlet tweet = {}\nngmi_users.forEach((user) => {\n    topic = 'tweets/'+ user\n    if(msg.topic == topic && msg.tweet.in_reply_to_status_id == null) {\n\n        tweet = msg\n    }\n})\n\nif(typeof tweet.topic == \"undefined\" || !enable_twitter_bot){\n\n    return [null,msg]\n}\nelse {\n    msg.payload = tweet\n    return [msg,null]\n}\n",
+        "func": "let ngmi_users = flow.get(\"ngmi_users\") || []\nlet enable_twitter_bot = flow.get(\"enable_twitter_bot\") || false\n\nlet tweet = {}\nngmi_users.forEach((user) => {\n    topic = 'tweets/'+ user\n    if(msg.topic == topic && msg.tweet.in_reply_to_status_id == null && !msg.tweet.retweeted_status) {\n\n        tweet = msg\n    }\n})\n\nif(typeof tweet.topic == \"undefined\" || !enable_twitter_bot){\n\n    return [null,msg]\n}\nelse {\n    msg.payload = tweet\n    return [msg,null]\n}\n",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -1556,8 +1557,7 @@
         "y": 520,
         "wires": [
             [
-                "2107b405.f9664c",
-                "56acf692.2c6a48"
+                "2107b405.f9664c"
             ],
             []
         ]
@@ -1576,7 +1576,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 670,
-        "y": 560,
+        "y": 460,
         "wires": []
     },
     {
@@ -1976,7 +1976,7 @@
         "z": "f7df2808.c1be98",
         "name": "",
         "group": "979a72d2e1e9ce87",
-        "order": 3,
+        "order": 4,
         "width": 0,
         "height": 0,
         "passthru": false,
@@ -2021,7 +2021,7 @@
         "z": "f7df2808.c1be98",
         "name": "",
         "group": "979a72d2e1e9ce87",
-        "order": 1,
+        "order": 2,
         "width": 0,
         "height": 0,
         "passthru": false,
@@ -2050,7 +2050,7 @@
         "name": "Form add NGMI Users",
         "label": "NGMI Users",
         "group": "979a72d2e1e9ce87",
-        "order": 4,
+        "order": 1,
         "width": 0,
         "height": 0,
         "options": [
@@ -2328,7 +2328,7 @@
         "name": "",
         "label": "",
         "group": "7113ac1107b6ef4f",
-        "order": 3,
+        "order": 1,
         "width": 0,
         "height": 0,
         "options": [
@@ -2384,7 +2384,7 @@
         "type": "ui_text",
         "z": "f7df2808.c1be98",
         "group": "7113ac1107b6ef4f",
-        "order": 1,
+        "order": 2,
         "width": 0,
         "height": 0,
         "name": "",
@@ -2466,7 +2466,7 @@
         "type": "ui_text",
         "z": "f7df2808.c1be98",
         "group": "7113ac1107b6ef4f",
-        "order": 2,
+        "order": 3,
         "width": 0,
         "height": 0,
         "name": "",
@@ -2638,7 +2638,7 @@
         "type": "ui_text",
         "z": "f7df2808.c1be98",
         "group": "979a72d2e1e9ce87",
-        "order": 2,
+        "order": 3,
         "width": 0,
         "height": 0,
         "name": "Tweet bot status",
@@ -2860,8 +2860,8 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 1940,
-        "y": 1880,
+        "x": 1860,
+        "y": 1900,
         "wires": [
             [
                 "c05b2d0af9837e8e"
@@ -2879,8 +2879,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2130,
-        "y": 1880,
+        "x": 2070,
+        "y": 1920,
         "wires": [
             []
         ]
@@ -2890,22 +2890,22 @@
         "type": "function",
         "z": "f7df2808.c1be98",
         "name": "Reload Chart",
-        "func": "msg.payload = flow.get(\"chart_pl\") || []\n\nreturn msg;",
+        "func": "msg.payload = flow.get(\"chart_pl\") || []\n\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1530,
-        "y": 1860,
+        "x": 1610,
+        "y": 1820,
         "wires": [
             [
-                "46a1ede839fbaebd"
+                "54ffc403cbd2d1c7"
             ]
         ]
     },
     {
-        "id": "46a1ede839fbaebd",
+        "id": "a985b93940b33052",
         "type": "function",
         "z": "f7df2808.c1be98",
         "name": "Build chart",
@@ -2915,8 +2915,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1730,
-        "y": 1860,
+        "x": 1650,
+        "y": 1900,
         "wires": [
             [
                 "54ffc403cbd2d1c7"
@@ -2924,7 +2924,7 @@
         ]
     },
     {
-        "id": "4143bc616a247ea1",
+        "id": "67d9ca9e64be0bc8",
         "type": "inject",
         "z": "f7df2808.c1be98",
         "name": "",
@@ -2943,7 +2943,7 @@
         "onceDelay": "0.1",
         "topic": "",
         "payloadType": "date",
-        "x": 1510,
+        "x": 1450,
         "y": 1820,
         "wires": [
             [
@@ -2952,7 +2952,24 @@
         ]
     },
     {
-        "id": "167286ed708ed083",
+        "id": "f0a3ba25e75d3d91",
+        "type": "debug",
+        "z": "f7df2808.c1be98",
+        "name": "debug auth",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1850,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "279ed09b5c50ec89",
         "type": "ui_spacer",
         "z": "f7df2808.c1be98",
         "name": "spacer",
